@@ -23,7 +23,8 @@
         "php": ">=7.2",
         "illuminate/support": "^5.1|6.*|7.*|8.*|9.*|10.*",
         "jenssegers/agent" : "^2.6",
-        "ua-parser/uap-php": "^3.9"
+        "ua-parser/uap-php": "^3.9",
+        "pulkitjalan/geoip": "^6.0"
     },
     "require-dev": {
         "orchestra/testbench": "^4.0",
