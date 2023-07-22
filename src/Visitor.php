@@ -4,6 +4,9 @@ namespace Shetabit\Visitor;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use PulkitJalan\GeoIP\GeoIP;
+use PulkitJalan\GeoIP\Exceptions\GeoIPException;
 use Shetabit\Visitor\Contracts\UserAgentParser;
 use Shetabit\Visitor\Exceptions\DriverNotFoundException;
 use Shetabit\Visitor\Models\Visit;
@@ -52,6 +55,13 @@ class Visitor implements UserAgentParser
     protected $visitor;
 
     /**
+     * Creating GeoIP Instance
+     * 
+     * @var GeoIP
+     */
+    protected $geoip;
+
+    /**
      * Visitor constructor.
      *
      * @param $config
@@ -65,6 +75,15 @@ class Visitor implements UserAgentParser
         $this->except = $config['except'];
         $this->via($this->config['default']);
         $this->setVisitor($request->user());
+
+        // Prevents GeoIP code breaks, if GEOIP Request Limit Exhausted;
+        try {
+            $this->geoip = new GeoIP();
+        } catch (GeoIPException $e) {
+            $this->geoip = null;
+            // Logs Error, When GEOIP is fails;
+            Log::error($e->getMessage());
+        }
     }
 
     /**
@@ -227,6 +246,32 @@ class Visitor implements UserAgentParser
     }
 
     /**
+     * Get Country of the Visitor
+     * 
+     */
+    public function country() {
+        if($this->geoip != null) {
+            $this->geoip->setIp($this->ip());
+            return $this->geoip->getCountry();
+        } else {
+            return 'undefined';
+        }
+    }
+
+    /**
+     * Get Country Code of the Visitor
+     * 
+     */
+    public function countryCode() {
+        if($this->geoip != null) {
+            $this->geoip->setIp($this->ip());
+            return $this->geoip->getCountryCode();
+        } else {
+            return 'undefined';
+        }
+    }
+
+    /**
      * Create a visit log.
      *
      * @param Model $model
@@ -285,6 +330,9 @@ class Visitor implements UserAgentParser
     /**
      * Prepare log's data.
      *
+     * Modified: 21 July 2023
+     * Added Country and Country Code
+     * 
      * @return array
      *
      * @throws \Exception
@@ -303,6 +351,8 @@ class Visitor implements UserAgentParser
             'platform' => $this->platform(),
             'browser' => $this->browser(),
             'ip' => $this->ip(),
+            'country' => $this->country(),
+            'country_code' => $this->countryCode(),
             'visitor_id' => $this->getVisitor() ? $this->getVisitor()->id : null,
             'visitor_type' => $this->getVisitor() ? get_class($this->getVisitor()): null
         ];
