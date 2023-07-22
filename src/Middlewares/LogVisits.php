@@ -18,7 +18,27 @@ class LogVisits
      */
     public function handle($request, Closure $next)
     {
+        if(session()->has('visit')) {
+            $visitData = session()->get('visit');
+
+            if($visitData['ip'] != $request->ip() || $visitData['url'] != $request->url()) {
+                $this->logVisit($request);
+            }
+        } else {
+            $this->logVisit($request);
+        }
+
+        return $next($request);
+    }
+
+    public function logVisit($request) {
+
         $logHasSaved = false;
+
+        session(['visit' => [
+            'ip' => $request->ip(),
+            'url' => $request->url(),
+        ]]);
 
         // create log for first binded model
         foreach ($request->route()->parameters() as $parameter) {
@@ -35,7 +55,5 @@ class LogVisits
         if (!$logHasSaved) {
             visitor()->visit();
         }
-
-        return $next($request);
     }
 }
