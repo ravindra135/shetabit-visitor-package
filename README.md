@@ -2,7 +2,7 @@
 
 # Laravel Visitor
 
-This is a laravel package to extract and access visitors' information such as `browser`, `ip`, `device` and etc.
+This is a laravel package to extract and access visitors' information such as `browser`, `ip`, `device`, `country` and etc.
 
 **In this package, you can recognize online users and determine if a user is online or not**
 
@@ -51,12 +51,17 @@ We have the below methods to retrieve a visitor's information:
 - `browser` : browser's name
 - `languages` : language's name
 - `ip` : client's ip
+- `country` : client's country
+- `country code` : client's country code
 - `request` : the whole request inputs
 - `useragent` : the whole useragent
 - `isOnline` : determines if current (or given) user is online
+- `getUniqueVisitors` : returns a number of unique visitors excluding bots and crawlers
+- `getAllTimeVists` : returns a number of visits
 
 ```php
 $request->visitor()->browser(); // firefox
+$request->visitor()->country(); // India
 $request->visitor()->visit($post); // create log for post
 $request->visitor()->setVisitor($user)->visit($post); // create a log which says $user has visited $post
 ```
