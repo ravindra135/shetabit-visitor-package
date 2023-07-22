@@ -33,6 +33,11 @@ class VisitorServiceProvider extends ServiceProvider
             ], 'migrations');
         }
 
+        if(! class_exists('EditVisitsTableAddCountryRelatedColumn')) {
+            $this->publishes ([
+                __DIR__ . '/../../database/migrations/edit_visits_table_add_country_related_column.php.stub' => database_path("/migrations/" . date('Y_m_d_His', time()) . "_edit_visits_table_add_country_related_column.php"),
+            ]);
+        }
 
         $this->registerMacroHelpers();
     }
