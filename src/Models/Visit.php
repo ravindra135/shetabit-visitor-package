@@ -22,6 +22,7 @@ class Visit extends Model
         'method', 'request', 'url', 'referer',
         'languages', 'useragent', 'headers',
         'device', 'platform', 'browser', 'ip',
+        'country', 'country_code',
         'visitor_id', 'visitor_type',
     ];
 
