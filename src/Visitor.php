@@ -5,6 +5,8 @@ namespace Shetabit\Visitor;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use PulkitJalan\GeoIP\GeoIP;
 use PulkitJalan\GeoIP\Exceptions\GeoIPException;
 use Shetabit\Visitor\Contracts\UserAgentParser;
@@ -268,6 +270,40 @@ class Visitor implements UserAgentParser
             return $this->geoip->getCountryCode();
         } else {
             return 'undefined';
+        }
+    }
+
+    /**
+     * Retrieve Unique Visitors for specified Days;
+     * If days are not specified '7' days will be used as default
+     * 
+     * Also, Bot & Crawlers are excluded from unique visitors,
+     * may be shown in total page views.
+     * 
+     * @param int $days
+     */
+    public function getUniqueVisitors($days = 7) : Int {
+        $subDays = Carbon::now()->subDays($days);
+        return DB::table(config('visitor.table_name'))
+                    ->selectRaw('COUNT(DISTINCT(ip)) as count')
+                    ->where('created_at', '>', $subDays)
+                    ->where('device', '!=', 'Bot')
+                    ->groupBy('ip')->get()->count();
+    }
+
+    /**
+     * Retrieve All time Vists
+     * or specify the days to retrieve for particular time-frame
+     * 
+     * @param int $days
+     */
+    public function getAllTimeVists($days = null) : Int {
+        $subDays = Carbon::now()->subDays($days);
+        
+        if($days != null) {
+            return DB::table(config('visitor.table_name'))->where('created_at', '>', $subDays)->get()->count();
+        } else {
+            return DB::table(config('visitor.table_name'))->get()->count();
         }
     }
 
